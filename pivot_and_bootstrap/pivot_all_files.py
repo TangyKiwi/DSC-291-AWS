@@ -43,7 +43,7 @@ def process_single_file(
     expected_month = infer_month_from_path(file_path)
     taxi_type = infer_taxi_type_from_path(file_path)
 
-    ddf = dd.read_parquet(file_path)
+    ddf = dd.read_parquet(file_path, storage_options={'anon': True})
     stats["input_rows"] += int(ddf.shape[0].compute())
 
     pdf = ddf.compute()
@@ -140,6 +140,7 @@ def main():
     intermediate_dir.mkdir(exist_ok=True)
 
     files = discover_parquet_files(input_dir)
+    logger.info("Discovered %d Parquet files", len(files))
 
     # Group by (year, month)
     files_by_month: Dict[Tuple[int, int], List[str]] = defaultdict(list)
