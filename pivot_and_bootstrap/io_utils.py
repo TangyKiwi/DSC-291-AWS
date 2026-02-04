@@ -35,8 +35,8 @@ def get_filesystem(path: str | Path):
     Return an fsspec filesystem for local or S3 paths.
     """
     if is_s3_path(path):
-        return fsspec.filesystem("s3", anon=True)
-    return fsspec.filesystem("file")
+        return fsspec.filesystem("s3", anon=True), path.replace("s3://", "", 1)
+    return fsspec.filesystem("file"), path
 
 
 # ----------------------------
@@ -49,7 +49,7 @@ def discover_parquet_files(input_path: str | Path) -> List[str]:
     Returns a sorted list of fully-qualified paths.
     """
     input_path = str(input_path)
-    fs = get_filesystem(input_path)
+    fs, _ = get_filesystem(input_path)
 
     if is_s3_path(input_path):
         # Remove scheme for fs.walk
