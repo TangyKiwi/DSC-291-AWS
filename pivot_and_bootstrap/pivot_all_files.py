@@ -247,8 +247,6 @@ def main():
             p.unlink()
 
     if client is not None:
-        if args.verbose:
-            logger.info("Shutting down Dask client")
         client.close()
 
 if __name__ == "__main__":
