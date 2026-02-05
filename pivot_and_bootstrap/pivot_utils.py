@@ -6,6 +6,7 @@ from typing import Optional, Tuple, Dict, List
 
 import pandas as pd
 import numpy as np
+import dask.dataframe as dd
 import logging
 
 logger = logging.getLogger(__name__)
@@ -87,17 +88,17 @@ def infer_month_from_path(file_path: str | Path) -> Optional[Tuple[int, int]]:
 # Pivoting
 # ----------------------------
 
-def pivot_counts_date_taxi_type_location(pdf: pd.DataFrame) -> pd.DataFrame:
+def pivot_counts_date_taxi_type_location(ddf: dd.DataFrame) -> dd.DataFrame:
     """
     Pivot counts into wide format:
     index = (taxi_type, date, pickup_place)
     columns = hour_0 ... hour_23
     """
     grouped = (
-        pdf
+        ddf
         .groupby(["taxi_type", "date", "pickup_place", "hour"])
         .size()
-        .rename("count")
+        .to_frame(name = 'count')
         .reset_index()
     )
 
@@ -122,19 +123,19 @@ def pivot_counts_date_taxi_type_location(pdf: pd.DataFrame) -> pd.DataFrame:
 # ----------------------------
 
 def cleanup_low_count_rows(
-    df: pd.DataFrame,
+    ddf: dd.DataFrame,
     min_rides: int = 50,
-) -> Tuple[pd.DataFrame, Dict[str, int]]:
+) -> Tuple[dd.DataFrame, Dict[str, int]]:
     """
     Drop rows where total rides across all hour columns < min_rides.
     """
-    hour_cols = [c for c in df.columns if c.startswith("hour_")]
-    totals = df[hour_cols].sum(axis=1)
+    hour_cols = [c for c in ddf.columns if c.startswith("hour_")]
+    totals = ddf[hour_cols].sum(axis=1)
 
     keep_mask = totals >= min_rides
     dropped = int((~keep_mask).sum())
 
-    cleaned = df.loc[keep_mask].reset_index(drop=True)
+    cleaned = ddf.loc[keep_mask].reset_index(drop=True)
 
     stats = {
         "rows_dropped_low_count": dropped,
