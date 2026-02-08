@@ -12,7 +12,7 @@ import dask
 import dask.dataframe as dd
 from dask import delayed, compute
 
-from io_utils import discover_parquet_files, get_filesystem
+from io_utils import discover_parquet_files, get_filesystem, is_s3_path
 from pivot_utils import (
     find_pickup_datetime_col,
     find_pickup_location_col,
@@ -53,7 +53,7 @@ def process_single_file(
     expected_month = infer_month_from_path(file_path)
     taxi_type = infer_taxi_type_from_path(file_path)
 
-    ddf = dd.read_parquet(file_path, storage_options={'anon': True})
+    ddf = dd.read_parquet(file_path, storage_options={'anon': True} if is_s3_path(file_path) else None)
 
     if partition_size is not None:
         ddf = ddf.repartition(partition_size=partition_size)
@@ -75,17 +75,19 @@ def process_single_file(
     stats["bad_parse_rows"] += int(bad_parse)
     ddf = ddf.dropna(subset=["pickup_datetime"])
 
-    ddf["date"] = ddf["pickup_datetime"].dt.date
-    ddf["hour"] = ddf["pickup_datetime"].dt.hour
-    ddf["pickup_place"] = ddf[pickup_loc_col]
-    ddf["taxi_type"] = taxi_type
+    ddf = ddf.assign(
+        date=ddf["pickup_datetime"].dt.date,
+        hour=ddf["pickup_datetime"].dt.hour,
+        pickup_place=ddf[pickup_loc_col],
+        taxi_type=taxi_type,
+    )
 
     if expected_month is not None:
         y, m = expected_month
-        mismatch = int(
+        mismatch = int((
             (ddf["pickup_datetime"].dt.year != y) |
             (ddf["pickup_datetime"].dt.month != m)
-        ).sum().compute()
+        ).sum().compute())
         stats["month_mismatch_rows"] += mismatch
     
         logger.info(
@@ -96,20 +98,21 @@ def process_single_file(
         )
 
     pdf = ddf.compute()
-
     pivoted = pivot_counts_date_taxi_type_location(pdf)
-
-    cleaned, cleanup_stats = cleanup_low_count_rows(
-        pivoted,
-        min_rides=min_rides,
-    )
+    cleaned, cleanup_stats = cleanup_low_count_rows(pivoted, min_rides)
 
     for k, v in cleanup_stats.items():
         stats[k] += v
     stats["output_rows"] += len(cleaned)
 
-    out_path = intermediate_dir / f"{Path(file_path).stem}_pivot.parquet"
-    cleaned.to_parquet(out_path, index=False)
+    out_path = f"{intermediate_dir}/{Path(file_path).stem}_pivot.parquet"
+
+    logger.info("Writing intermediate parquet to %s", out_path)
+
+    cleaned.to_parquet(
+        out_path,
+        storage_options={"anon": True} if is_s3_path(out_path) else None,
+    )
 
     logger.info(
         "[DONE file] %s output_rows=%d dropped_low_count=%d",
@@ -166,20 +169,31 @@ def combine_into_wide_table(
     """
     Combine all intermediate Parquet files into one wide table.
     """
-    files = list(intermediate_dir.glob("*.parquet"))
-    dfs = [pd.read_parquet(p) for p in files]
+    logger.info("Reading intermediates from %s", intermediate_dir)
 
-    combined = pd.concat(dfs, ignore_index=True)
-    hour_cols = [c for c in combined.columns if c.startswith("hour_")]
-
-    final = (
-        combined
-        .groupby(["taxi_type", "date", "pickup_place"], as_index=False)[hour_cols]
-        .sum()
+    ddf = dd.read_parquet(
+        intermediate_dir,
+        storage_options={"anon": True} if is_s3_path(intermediate_dir) else None,
     )
 
-    final.to_parquet(output_path, index=False)
-    return len(final)
+    hour_cols = [c for c in ddf.columns if c.startswith("hour_")]
+
+    final = (
+        ddf
+        .groupby(["taxi_type", "date", "pickup_place"])[hour_cols]
+        .sum()
+        .reset_index()
+    )
+
+    logger.info("Writing final output to %s", output_path)
+
+    final.to_parquet(
+        output_path,
+        write_index=False,
+        storage_options={"anon": True} if is_s3_path(output_path) else None,
+    )
+
+    return final.shape[0].compute()
 
 @delayed
 def merge_stats_dicts(stats_list):
@@ -219,11 +233,23 @@ def main():
         logger.info("Using single-threaded Dask")
 
     input_dir = args.input_dir
-    output_dir = Path(args.output_dir)
-    output_dir.mkdir(parents=True, exist_ok=True)
+    output_dir = args.output_dir
+    
+    fs, fs_path = get_filesystem(args.output_dir)
 
-    intermediate_dir = output_dir / "intermediate"
-    intermediate_dir.mkdir(exist_ok=True)
+    if fs.protocol == "file":
+        logger.info("Creating local output directory at %s", fs_path)
+        output_dir = Path(fs_path)
+        output_dir.mkdir(parents=True, exist_ok=True)
+        intermediate_dir = output_dir / "intermediate"
+        final_output = output_dir / "taxi_wide_table.parquet"
+        logger.info("Creating local intermediate directory at %s", intermediate_dir)
+        intermediate_dir.mkdir(exist_ok=True)
+    else:
+        logger.info("Using remote output directory at %s", output_dir)
+        intermediate_dir = f"{output_dir}intermediate"
+        final_output = f"{output_dir}taxi_wide_table.parquet"
+        fs.mkdirs(intermediate_dir, exist_ok=True)
 
     files = discover_parquet_files(input_dir)
     logger.info("Discovered %d Parquet files", len(files))
@@ -267,7 +293,6 @@ def main():
     month_stats = compute(*month_tasks)
     final_stats = merge_stats_dicts(month_stats).compute()  
 
-    final_output = output_dir / "taxi_wide_table.parquet"
     final_rows = combine_into_wide_table(intermediate_dir, final_output)
 
     final_stats["final_output_rows"] = final_rows
@@ -278,8 +303,17 @@ def main():
         logger.info("%s: %s", k, v)
 
     if not args.keep_intermediate:
-        for p in intermediate_dir.glob("*.parquet"):
-            p.unlink()
+        fs, base = get_filesystem(intermediate_dir)
+
+        logger.info("Removing intermediate files from %s", intermediate_dir)
+
+        for path in fs.ls(base):
+            fs.rm(path, recursive=True)
+
+        try:
+            fs.rmdir(base)
+        except Exception:
+            pass
 
     if client is not None:
         client.close()

@@ -1,0 +1,421 @@
+INFO:distributed.http.proxy:To route to workers diagnostics web server please install jupyter-server-proxy: python -m pip install jupyter-server-proxy
+INFO:distributed.scheduler:State start
+INFO:distributed.scheduler:  Scheduler at:     tcp://127.0.0.1:60172
+INFO:distributed.scheduler:  dashboard at:  http://127.0.0.1:8787/status
+INFO:distributed.scheduler:Registering Worker plugin shuffle
+INFO:distributed.nanny:        Start Nanny at: 'tcp://127.0.0.1:60189'
+INFO:distributed.nanny:        Start Nanny at: 'tcp://127.0.0.1:60181'
+INFO:distributed.nanny:        Start Nanny at: 'tcp://127.0.0.1:60183'
+INFO:distributed.nanny:        Start Nanny at: 'tcp://127.0.0.1:60185'
+INFO:distributed.nanny:        Start Nanny at: 'tcp://127.0.0.1:60187'
+INFO:distributed.nanny:        Start Nanny at: 'tcp://127.0.0.1:60175'
+INFO:distributed.nanny:        Start Nanny at: 'tcp://127.0.0.1:60177'
+INFO:distributed.nanny:        Start Nanny at: 'tcp://127.0.0.1:60179'
+INFO:distributed.worker:      Start worker at:      tcp://127.0.0.1:60197
+INFO:distributed.worker:         Listening to:      tcp://127.0.0.1:60197
+INFO:distributed.worker:          Worker name:                          7
+INFO:distributed.worker:         dashboard at:            127.0.0.1:60210
+INFO:distributed.worker:Waiting to connect to:      tcp://127.0.0.1:60172
+INFO:distributed.worker:-------------------------------------------------
+INFO:distributed.worker:              Threads:                          1
+INFO:distributed.worker:               Memory:                   7.97 GiB
+INFO:distributed.worker:      Local Directory: C:\Users\TANGYK~1\AppData\Local\Temp\dask-scratch-space\worker-a2rdci0y
+INFO:distributed.worker:-------------------------------------------------
+INFO:distributed.worker:      Start worker at:      tcp://127.0.0.1:60200
+INFO:distributed.worker:         Listening to:      tcp://127.0.0.1:60200
+INFO:distributed.worker:          Worker name:                          4
+INFO:distributed.worker:         dashboard at:            127.0.0.1:60215
+INFO:distributed.worker:Waiting to connect to:      tcp://127.0.0.1:60172
+INFO:distributed.worker:-------------------------------------------------
+INFO:distributed.worker:              Threads:                          1
+INFO:distributed.worker:               Memory:                   7.97 GiB
+INFO:distributed.worker:      Local Directory: C:\Users\TANGYK~1\AppData\Local\Temp\dask-scratch-space\worker-b4_k9o38
+INFO:distributed.worker:-------------------------------------------------
+INFO:distributed.worker:      Start worker at:      tcp://127.0.0.1:60205
+INFO:distributed.worker:         Listening to:      tcp://127.0.0.1:60205
+INFO:distributed.worker:          Worker name:                          6
+INFO:distributed.worker:         dashboard at:            127.0.0.1:60217
+INFO:distributed.worker:Waiting to connect to:      tcp://127.0.0.1:60172
+INFO:distributed.worker:-------------------------------------------------
+INFO:distributed.worker:              Threads:                          1
+INFO:distributed.worker:               Memory:                   7.97 GiB
+INFO:distributed.worker:      Local Directory: C:\Users\TANGYK~1\AppData\Local\Temp\dask-scratch-space\worker-miv5hkr3
+INFO:distributed.worker:-------------------------------------------------
+INFO:distributed.worker:      Start worker at:      tcp://127.0.0.1:60206
+INFO:distributed.worker:         Listening to:      tcp://127.0.0.1:60206
+INFO:distributed.worker:          Worker name:                          5
+INFO:distributed.worker:         dashboard at:            127.0.0.1:60220
+INFO:distributed.worker:Waiting to connect to:      tcp://127.0.0.1:60172
+INFO:distributed.worker:-------------------------------------------------
+INFO:distributed.worker:              Threads:                          1
+INFO:distributed.worker:               Memory:                   7.97 GiB
+INFO:distributed.worker:      Local Directory: C:\Users\TANGYK~1\AppData\Local\Temp\dask-scratch-space\worker-tob5mo1t
+INFO:distributed.worker:-------------------------------------------------
+INFO:distributed.scheduler:Register worker addr: tcp://127.0.0.1:60197 name: 7
+INFO:distributed.worker:      Start worker at:      tcp://127.0.0.1:60209
+INFO:distributed.worker:         Listening to:      tcp://127.0.0.1:60209
+INFO:distributed.worker:          Worker name:                          3
+INFO:distributed.worker:         dashboard at:            127.0.0.1:60223
+INFO:distributed.worker:Waiting to connect to:      tcp://127.0.0.1:60172
+INFO:distributed.worker:-------------------------------------------------
+INFO:distributed.worker:              Threads:                          1
+INFO:distributed.worker:               Memory:                   7.97 GiB
+INFO:distributed.worker:      Local Directory: C:\Users\TANGYK~1\AppData\Local\Temp\dask-scratch-space\worker-j5zifb_h
+INFO:distributed.worker:-------------------------------------------------
+INFO:distributed.worker:      Start worker at:      tcp://127.0.0.1:60214
+INFO:distributed.worker:         Listening to:      tcp://127.0.0.1:60214
+INFO:distributed.worker:          Worker name:                          2
+INFO:distributed.worker:         dashboard at:            127.0.0.1:60225
+INFO:distributed.worker:Waiting to connect to:      tcp://127.0.0.1:60172
+INFO:distributed.worker:-------------------------------------------------
+INFO:distributed.worker:              Threads:                          1
+INFO:distributed.worker:               Memory:                   7.97 GiB
+INFO:distributed.worker:      Local Directory: C:\Users\TANGYK~1\AppData\Local\Temp\dask-scratch-space\worker-31j33kx_
+INFO:distributed.worker:-------------------------------------------------
+INFO:distributed.worker:      Start worker at:      tcp://127.0.0.1:60219
+INFO:distributed.worker:         Listening to:      tcp://127.0.0.1:60219
+INFO:distributed.worker:          Worker name:                          1
+INFO:distributed.worker:         dashboard at:            127.0.0.1:60227
+INFO:distributed.worker:Waiting to connect to:      tcp://127.0.0.1:60172
+INFO:distributed.worker:-------------------------------------------------
+INFO:distributed.worker:              Threads:                          1
+INFO:distributed.worker:               Memory:                   7.97 GiB
+INFO:distributed.worker:      Local Directory: C:\Users\TANGYK~1\AppData\Local\Temp\dask-scratch-space\worker-891rq9g9
+INFO:distributed.worker:-------------------------------------------------
+INFO:distributed.scheduler:Starting worker compute stream, tcp://127.0.0.1:60197
+INFO:distributed.core:Starting established connection to tcp://127.0.0.1:60211
+INFO:distributed.worker:      Start worker at:      tcp://127.0.0.1:60221
+INFO:distributed.worker:Starting Worker plugin shuffle
+INFO:distributed.worker:         Listening to:      tcp://127.0.0.1:60221
+INFO:distributed.worker:          Worker name:                          0
+INFO:distributed.worker:         dashboard at:            127.0.0.1:60229
+INFO:distributed.worker:Waiting to connect to:      tcp://127.0.0.1:60172
+INFO:distributed.worker:-------------------------------------------------
+INFO:distributed.worker:              Threads:                          1
+INFO:distributed.worker:               Memory:                   7.97 GiB
+INFO:distributed.worker:      Local Directory: C:\Users\TANGYK~1\AppData\Local\Temp\dask-scratch-space\worker-5j79n53o
+INFO:distributed.worker:-------------------------------------------------
+INFO:distributed.worker:        Registered to:      tcp://127.0.0.1:60172
+INFO:distributed.worker:-------------------------------------------------
+INFO:distributed.scheduler:Register worker addr: tcp://127.0.0.1:60200 name: 4
+INFO:distributed.scheduler:Starting worker compute stream, tcp://127.0.0.1:60200
+INFO:distributed.core:Starting established connection to tcp://127.0.0.1:60216
+INFO:distributed.worker:Starting Worker plugin shuffle
+INFO:distributed.core:Starting established connection to tcp://127.0.0.1:60172
+INFO:distributed.worker:        Registered to:      tcp://127.0.0.1:60172
+INFO:distributed.worker:-------------------------------------------------
+INFO:distributed.scheduler:Register worker addr: tcp://127.0.0.1:60205 name: 6
+INFO:distributed.scheduler:Starting worker compute stream, tcp://127.0.0.1:60205
+INFO:distributed.core:Starting established connection to tcp://127.0.0.1:60218
+INFO:distributed.scheduler:Register worker addr: tcp://127.0.0.1:60206 name: 5
+INFO:distributed.worker:Starting Worker plugin shuffle
+INFO:distributed.core:Starting established connection to tcp://127.0.0.1:60172
+INFO:distributed.scheduler:Starting worker compute stream, tcp://127.0.0.1:60206
+INFO:distributed.core:Starting established connection to tcp://127.0.0.1:60222
+INFO:distributed.worker:        Registered to:      tcp://127.0.0.1:60172
+INFO:distributed.worker:-------------------------------------------------
+INFO:distributed.worker:Starting Worker plugin shuffle
+INFO:distributed.worker:        Registered to:      tcp://127.0.0.1:60172
+INFO:distributed.worker:-------------------------------------------------
+INFO:distributed.core:Starting established connection to tcp://127.0.0.1:60172
+INFO:distributed.core:Starting established connection to tcp://127.0.0.1:60172
+INFO:distributed.scheduler:Register worker addr: tcp://127.0.0.1:60221 name: 0
+INFO:distributed.scheduler:Starting worker compute stream, tcp://127.0.0.1:60221
+INFO:distributed.core:Starting established connection to tcp://127.0.0.1:60230
+INFO:distributed.worker:Starting Worker plugin shuffle
+INFO:distributed.scheduler:Register worker addr: tcp://127.0.0.1:60214 name: 2
+INFO:distributed.worker:        Registered to:      tcp://127.0.0.1:60172
+INFO:distributed.scheduler:Starting worker compute stream, tcp://127.0.0.1:60214
+INFO:distributed.worker:-------------------------------------------------
+INFO:distributed.core:Starting established connection to tcp://127.0.0.1:60226
+INFO:distributed.scheduler:Register worker addr: tcp://127.0.0.1:60219 name: 1
+INFO:distributed.worker:Starting Worker plugin shuffle
+INFO:distributed.scheduler:Starting worker compute stream, tcp://127.0.0.1:60219
+INFO:distributed.core:Starting established connection to tcp://127.0.0.1:60228
+INFO:distributed.worker:        Registered to:      tcp://127.0.0.1:60172
+INFO:distributed.worker:-------------------------------------------------
+INFO:distributed.worker:Starting Worker plugin shuffle
+INFO:distributed.scheduler:Register worker addr: tcp://127.0.0.1:60209 name: 3
+INFO:distributed.core:Starting established connection to tcp://127.0.0.1:60172
+INFO:distributed.scheduler:Starting worker compute stream, tcp://127.0.0.1:60209
+INFO:distributed.core:Starting established connection to tcp://127.0.0.1:60224
+INFO:distributed.worker:        Registered to:      tcp://127.0.0.1:60172
+INFO:distributed.worker:-------------------------------------------------
+INFO:distributed.core:Starting established connection to tcp://127.0.0.1:60172
+INFO:distributed.worker:Starting Worker plugin shuffle
+INFO:distributed.core:Starting established connection to tcp://127.0.0.1:60172
+INFO:distributed.worker:        Registered to:      tcp://127.0.0.1:60172
+INFO:distributed.worker:-------------------------------------------------
+INFO:distributed.core:Starting established connection to tcp://127.0.0.1:60172
+INFO:distributed.scheduler:Receive client connection: Client-e35ae6c3-04a1-11f1-85cc-84144d2c9047
+INFO:distributed.core:Starting established connection to tcp://127.0.0.1:60231
+INFO:distributed.worker:Run out-of-band function 'lambda'
+INFO:__main__:Using Dask distributed with 8 workers
+INFO:__main__:Using remote output directory at dsc291-taxi/taxi-output/
+INFO:__main__:Creating remote intermediate directory at s3://dsc291-taxi/taxi-output/intermediate
+INFO:__main__:Discovered 9 Parquet files
+INFO:__main__:Scheduling 2023-01 (1 files)
+INFO:__main__:Optimal partition size for 2023-01: 134217728B
+INFO:__main__:Scheduling 2023-02 (1 files)
+INFO:__main__:Optimal partition size for 2023-02: 134217728B
+INFO:__main__:Scheduling 2023-03 (1 files)
+INFO:__main__:Optimal partition size for 2023-03: 134217728B
+INFO:__main__:Scheduling 2023-04 (1 files)
+INFO:__main__:Optimal partition size for 2023-04: 134217728B
+INFO:__main__:Scheduling 2023-05 (1 files)
+INFO:__main__:Optimal partition size for 2023-05: 268435456B
+INFO:__main__:Scheduling 2023-06 (1 files)
+INFO:__main__:Optimal partition size for 2023-06: 67108864B
+INFO:__main__:Scheduling 2023-07 (1 files)
+INFO:__main__:Optimal partition size for 2023-07: 67108864B
+INFO:__main__:Scheduling 2023-08 (1 files)
+INFO:__main__:Optimal partition size for 2023-08: 268435456B
+INFO:__main__:Scheduling 2023-09 (1 files)
+INFO:__main__:Optimal partition size for 2023-09: 268435456B
+INFO:__main__:[START month] 1 files partition_size=67108864B
+INFO:__main__:[START month] 1 files partition_size=268435456B
+INFO:__main__:[DONE month] 1 files complete
+INFO:__main__:[START month] 1 files partition_size=134217728B
+INFO:__main__:[START month] 1 files partition_size=134217728B
+INFO:__main__:[START month] 1 files partition_size=268435456B
+INFO:__main__:[DONE month] 1 files complete
+INFO:__main__:[START month] 1 files partition_size=268435456B
+INFO:__main__:[DONE month] 1 files complete
+INFO:__main__:[DONE month] 1 files complete
+INFO:__main__:[DONE month] 1 files complete
+INFO:__main__:[START month] 1 files partition_size=134217728B
+INFO:__main__:[DONE month] 1 files complete
+INFO:__main__:[START month] 1 files partition_size=67108864B
+INFO:__main__:[DONE month] 1 files complete
+INFO:__main__:[START month] 1 files partition_size=134217728B
+INFO:__main__:[DONE month] 1 files complete
+INFO:__main__:[DONE month] 1 files complete
+INFO:__main__:[START file] s3://dsc291-ucsd/taxi/Dataset/2023/yellow_taxi/yellow_tripdata_2023-05.parquet
+INFO:__main__:[START file] s3://dsc291-ucsd/taxi/Dataset/2023/yellow_taxi/yellow_tripdata_2023-02.parquet
+INFO:__main__:[START file] s3://dsc291-ucsd/taxi/Dataset/2023/yellow_taxi/yellow_tripdata_2023-03.parquet
+INFO:__main__:[START file] s3://dsc291-ucsd/taxi/Dataset/2023/yellow_taxi/yellow_tripdata_2023-08.parquet
+INFO:__main__:[START file] s3://dsc291-ucsd/taxi/Dataset/2023/yellow_taxi/yellow_tripdata_2023-04.parquet
+INFO:__main__:[START file] s3://dsc291-ucsd/taxi/Dataset/2023/yellow_taxi/yellow_tripdata_2023-06.parquet
+INFO:__main__:[START file] s3://dsc291-ucsd/taxi/Dataset/2023/yellow_taxi/yellow_tripdata_2023-09.parquet
+INFO:__main__:[START file] s3://dsc291-ucsd/taxi/Dataset/2023/yellow_taxi/yellow_tripdata_2023-01.parquet
+INFO:distributed.scheduler:Receive client connection: Client-worker-e64cebf3-04a1-11f1-96ec-84144d2c9047
+INFO:distributed.core:Starting established connection to tcp://127.0.0.1:60286
+INFO:distributed.scheduler:Receive client connection: Client-worker-e64f18cb-04a1-11f1-aee4-84144d2c9047
+INFO:distributed.core:Starting established connection to tcp://127.0.0.1:60287
+INFO:distributed.scheduler:Receive client connection: Client-worker-e651bb28-04a1-11f1-bdb0-84144d2c9047
+INFO:distributed.core:Starting established connection to tcp://127.0.0.1:60289
+INFO:distributed.scheduler:Receive client connection: Client-worker-e6551fde-04a1-11f1-b79c-84144d2c9047
+INFO:distributed.core:Starting established connection to tcp://127.0.0.1:60290
+INFO:distributed.scheduler:Receive client connection: Client-worker-e655011e-04a1-11f1-af74-84144d2c9047
+INFO:distributed.core:Starting established connection to tcp://127.0.0.1:60292
+INFO:distributed.scheduler:Receive client connection: Client-worker-e655a712-04a1-11f1-8ce4-84144d2c9047
+INFO:distributed.core:Starting established connection to tcp://127.0.0.1:60293
+INFO:distributed.scheduler:Receive client connection: Client-worker-e65875fe-04a1-11f1-9bc4-84144d2c9047
+INFO:distributed.core:Starting established connection to tcp://127.0.0.1:60295
+INFO:distributed.scheduler:Receive client connection: Client-worker-e6567396-04a1-11f1-a34c-84144d2c9047
+INFO:distributed.core:Starting established connection to tcp://127.0.0.1:60294
+INFO:__main__:[START file] s3://dsc291-ucsd/taxi/Dataset/2023/yellow_taxi/yellow_tripdata_2023-07.parquet
+INFO:__main__:[READ file] s3://dsc291-ucsd/taxi/Dataset/2023/yellow_taxi/yellow_tripdata_2023-07.parquet rows=2907108 partitions=7
+INFO:__main__:[READ file] s3://dsc291-ucsd/taxi/Dataset/2023/yellow_taxi/yellow_tripdata_2023-06.parquet rows=3307234 partitions=7
+INFO:__main__:[READ file] s3://dsc291-ucsd/taxi/Dataset/2023/yellow_taxi/yellow_tripdata_2023-09.parquet rows=2846722 partitions=2
+INFO:__main__:[READ file] s3://dsc291-ucsd/taxi/Dataset/2023/yellow_taxi/yellow_tripdata_2023-02.parquet rows=2913955 partitions=4
+INFO:__main__:[READ file] s3://dsc291-ucsd/taxi/Dataset/2023/yellow_taxi/yellow_tripdata_2023-01.parquet rows=3066766 partitions=4
+INFO:__main__:[READ file] s3://dsc291-ucsd/taxi/Dataset/2023/yellow_taxi/yellow_tripdata_2023-03.parquet rows=3403766 partitions=4
+INFO:__main__:[READ file] s3://dsc291-ucsd/taxi/Dataset/2023/yellow_taxi/yellow_tripdata_2023-04.parquet rows=3288250 partitions=4
+INFO:__main__:[AGG file] s3://dsc291-ucsd/taxi/Dataset/2023/yellow_taxi/yellow_tripdata_2023-07.parquet bad_parse=0 month_mismatch=59
+INFO:__main__:[READ file] s3://dsc291-ucsd/taxi/Dataset/2023/yellow_taxi/yellow_tripdata_2023-08.parquet rows=2824209 partitions=2
+INFO:__main__:[AGG file] s3://dsc291-ucsd/taxi/Dataset/2023/yellow_taxi/yellow_tripdata_2023-06.parquet bad_parse=0 month_mismatch=41
+INFO:__main__:[AGG file] s3://dsc291-ucsd/taxi/Dataset/2023/yellow_taxi/yellow_tripdata_2023-02.parquet bad_parse=0 month_mismatch=55
+INFO:__main__:[AGG file] s3://dsc291-ucsd/taxi/Dataset/2023/yellow_taxi/yellow_tripdata_2023-01.parquet bad_parse=0 month_mismatch=48
+INFO:__main__:[AGG file] s3://dsc291-ucsd/taxi/Dataset/2023/yellow_taxi/yellow_tripdata_2023-03.parquet bad_parse=0 month_mismatch=189
+INFO:__main__:[READ file] s3://dsc291-ucsd/taxi/Dataset/2023/yellow_taxi/yellow_tripdata_2023-05.parquet rows=3513649 partitions=2
+INFO:__main__:[AGG file] s3://dsc291-ucsd/taxi/Dataset/2023/yellow_taxi/yellow_tripdata_2023-09.parquet bad_parse=0 month_mismatch=32
+INFO:distributed.core:Event loop was unresponsive in Worker for 3.82s.  This is often caused by long-running GIL-holding functions or moving large chunks of data. This can cause timeouts and instability.
+INFO:__main__:Writing intermediate parquet to s3://dsc291-taxi/taxi-output/intermediate/yellow_tripdata_2023-07_pivot
+ERROR:distributed.worker:Compute Failed
+Key:       process_single_file-4a5cfb10-71ba-45c8-8f66-e7dcefdcd30b
+State:     long-running
+Task:  <Task 'process_single_file-4a5cfb10-71ba-45c8-8f66-e7dcefdcd30b' process_single_file(, ...)>
+Exception: 'TypeError("__cinit__() got an unexpected keyword argument \'write_index\'")'
+Traceback: '  File "C:\\Users\\TangyKiwi\\Desktop\\UCSD\\DSC-291-AWS\\pivot_and_bootstrap\\pivot_all_files.py", line 112, in process_single_file\n    cleaned.to_parquet(\n    ~~~~~~~~~~~~~~~~~~^\n        out_path,\n        ^^^^^^^^^\n        write_index=False,\n        ^^^^^^^^^^^^^^^^^^\n        storage_options={"anon": True} if is_s3_path(out_path) else None,\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\n  File "C:\\Users\\TangyKiwi\\AppData\\Local\\Programs\\Python\\Python313\\Lib\\site-packages\\pandas\\util\\_decorators.py", line 333, in wrapper\n    return func(*args, **kwargs)\n  File "C:\\Users\\TangyKiwi\\AppData\\Local\\Programs\\Python\\Python313\\Lib\\site-packages\\pandas\\core\\frame.py", line 3124, in to_parquet\n    return to_parquet(\n        self,\n    ...<6 lines>...\n        **kwargs,\n    )\n  File "C:\\Users\\TangyKiwi\\AppData\\Local\\Programs\\Python\\Python313\\Lib\\site-packages\\pandas\\io\\parquet.py", line 482, in to_parquet\n    impl.write(\n    ~~~~~~~~~~^\n        df,\n        ^^^\n    ...<6 lines>...\n        **kwargs,\n        ^^^^^^^^^\n    )\n    ^\n  File "C:\\Users\\TangyKiwi\\AppData\\Local\\Programs\\Python\\Python313\\Lib\\site-packages\\pandas\\io\\parquet.py", line 229, in write\n    self.api.parquet.write_table(\n    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^\n        table,\n        ^^^^^^\n    ...<3 lines>...\n        **kwargs,\n        ^^^^^^^^^\n    )\n    ^\n  File "C:\\Users\\TangyKiwi\\AppData\\Local\\Programs\\Python\\Python313\\Lib\\site-packages\\pyarrow\\parquet\\core.py", line 1987, in write_table\n    with ParquetWriter(\n         ~~~~~~~~~~~~~^\n            where, table.schema,\n            ^^^^^^^^^^^^^^^^^^^^\n    ...<24 lines>...\n            max_rows_per_page=max_rows_per_page,\n            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n            **kwargs) as writer:\n            ^^^^^^^^^\n  File "C:\\Users\\TangyKiwi\\AppData\\Local\\Programs\\Python\\Python313\\Lib\\site-packages\\pyarrow\\parquet\\core.py", line 1082, in __init__\n    self.writer = _parquet.ParquetWriter(\n                  ~~~~~~~~~~~~~~~~~~~~~~^\n        sink, schema,\n        ^^^^^^^^^^^^^\n    ...<20 lines>...\n        max_rows_per_page=max_rows_per_page,\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n        **options)\n        ^^^^^^^^^^\n  File "pyarrow/_parquet.pyx", line 2300, in pyarrow._parquet.ParquetWriter.__cinit__\n'
+
+INFO:__main__:Writing intermediate parquet to s3://dsc291-taxi/taxi-output/intermediate/yellow_tripdata_2023-09_pivot
+Traceback (most recent call last):
+  File "C:\Users\TangyKiwi\Desktop\UCSD\DSC-291-AWS\pivot_and_bootstrap\pivot_all_files.py", line 323, in <module>
+    main()
+    ~~~~^^
+  File "C:\Users\TangyKiwi\Desktop\UCSD\DSC-291-AWS\pivot_and_bootstrap\pivot_all_files.py", line 294, in main
+    final_stats = merge_stats_dicts(month_stats).compute()
+  File "C:\Users\TangyKiwi\AppData\Local\Programs\Python\Python313\Lib\site-packages\dask\base.py", line 377, in compute
+    (result,) = compute(self, traverse=False, **kwargs)
+                ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\TangyKiwi\AppData\Local\Programs\Python\Python313\Lib\site-packages\dask\base.py", line 685, in compute
+    results = schedule(expr, keys, **kwargs)
+  File "C:\Users\TangyKiwi\Desktop\UCSD\DSC-291-AWS\pivot_and_bootstrap\pivot_all_files.py", line 112, in process_single_file
+    cleaned.to_parquet(
+      ^^^^^^^^^^^^^^^^^
+  File "C:\Users\TangyKiwi\AppData\Local\Programs\Python\Python313\Lib\site-packages\pandas\util\_decorators.py", line 333, in wrapper
+    return func(*args, **kwargs)
+    ^^^^^^^^^^^
+  File "C:\Users\TangyKiwi\AppData\Local\Programs\Python\Python313\Lib\site-packages\pandas\io\parquet.py", line 482, in to_parquet
+    impl.write(
+      ^^^^^^^^^
+  File "C:\Users\TangyKiwi\AppData\Local\Programs\Python\Python313\Lib\site-packages\pandas\io\parquet.py", line 229, in write
+    self.api.parquet.write_table(
+    ^^^^^^^
+  File "C:\Users\TangyKiwi\AppData\Local\Programs\Python\Python313\Lib\site-packages\pyarrow\parquet\core.py", line 1987, in write_table
+    with ParquetWriter(
+    ^^^^^^^^^^^^^^^
+  File "C:\Users\TangyKiwi\AppData\Local\Programs\Python\Python313\Lib\site-packages\pyarrow\parquet\core.py", line 1082, in __init__
+    self.writer = _parquet.ParquetWriter(
+    ^^^^^^^^^^^^^^^
+  File "pyarrow/_parquet.pyx", line 2300, in pyarrow._parquet.ParquetWriter.__cinit__
+    def __cinit__(self, where, Schema schema not None, use_dictionary=None,
+      ^^^^^^^^^^^^^^^^^
+TypeError: __cinit__() got an unexpected keyword argument 'write_index'
+INFO:distributed.scheduler:Retire worker addresses (stimulus_id='retire-workers-1770522905.1240587') (0, 1, 2, 3, 4, 5, 6, 7)
+INFO:distributed.nanny:Closing Nanny at 'tcp://127.0.0.1:60175'. Reason: nanny-close
+INFO:distributed.nanny:Nanny asking worker to close. Reason: nanny-close
+INFO:distributed.nanny:Closing Nanny at 'tcp://127.0.0.1:60177'. Reason: nanny-close
+INFO:distributed.nanny:Nanny asking worker to close. Reason: nanny-close
+INFO:distributed.nanny:Closing Nanny at 'tcp://127.0.0.1:60179'. Reason: nanny-close
+INFO:distributed.nanny:Nanny asking worker to close. Reason: nanny-close
+INFO:distributed.nanny:Closing Nanny at 'tcp://127.0.0.1:60181'. Reason: nanny-close
+INFO:distributed.worker:Stopping worker at tcp://127.0.0.1:60221. Reason: nanny-close
+INFO:distributed.nanny:Nanny asking worker to close. Reason: nanny-close
+INFO:distributed.nanny:Closing Nanny at 'tcp://127.0.0.1:60183'. Reason: nanny-close
+INFO:distributed.worker:Stopping worker at tcp://127.0.0.1:60214. Reason: nanny-close
+WARNING:distributed.worker.state_machine:Async instruction for <Task cancelled name="execute('process_single_file-0450a3e3-9541-42d8-ac31-ef1e06d32c52')" coro=<Worker.execute() done, defined at C:\Users\TangyKiwi\AppData\Local\Programs\Python\Python313\Lib\site-packages\distributed\worker_state_machine.py:3608>> ended with CancelledError
+INFO:distributed.worker:Removing Worker plugin shuffle
+INFO:distributed.nanny:Nanny asking worker to close. Reason: nanny-close
+INFO:distributed.nanny:Closing Nanny at 'tcp://127.0.0.1:60185'. Reason: nanny-close
+INFO:distributed.nanny:Nanny asking worker to close. Reason: nanny-close
+INFO:distributed.worker:Removing Worker plugin shuffle
+INFO:distributed.nanny:Closing Nanny at 'tcp://127.0.0.1:60187'. Reason: nanny-close
+INFO:distributed.nanny:Nanny asking worker to close. Reason: nanny-close
+INFO:distributed.worker:Stopping worker at tcp://127.0.0.1:60200. Reason: nanny-close
+INFO:distributed.nanny:Closing Nanny at 'tcp://127.0.0.1:60189'. Reason: nanny-close
+INFO:distributed.nanny:Nanny asking worker to close. Reason: nanny-close
+WARNING:distributed.worker.state_machine:Async instruction for <Task cancelled name="execute(('read_parquet-fused-db1f7d04d16fe56b65a24f61715c974e', 0))" coro=<Worker.execute() done, defined at C:\Users\TangyKiwi\AppData\Local\Programs\Python\Python313\Lib\site-packages\distributed\worker_state_machine.py:3608>> ended with CancelledError
+WARNING:distributed.worker.state_machine:Async instruction for <Task cancelled name="execute('process_single_file-419190f3-0fc0-4b73-bd25-b9a2354be162')" coro=<Worker.execute() done, defined at C:\Users\TangyKiwi\AppData\Local\Programs\Python\Python313\Lib\site-packages\distributed\worker_state_machine.py:3608>> ended with CancelledError
+INFO:distributed.worker:Stopping worker at tcp://127.0.0.1:60205. Reason: nanny-close
+INFO:distributed.worker:Removing Worker plugin shuffle
+INFO:distributed.worker:Stopping worker at tcp://127.0.0.1:60197. Reason: nanny-close
+INFO:distributed.scheduler:Remove client Client-worker-e655011e-04a1-11f1-af74-84144d2c9047
+INFO:distributed.core:Received 'close-stream' from tcp://127.0.0.1:60292; closing.
+WARNING:distributed.worker.state_machine:Async instruction for <Task cancelled name="execute('process_single_file-2801a977-ecdf-486d-9961-480e013fdd48')" coro=<Worker.execute() done, defined at C:\Users\TangyKiwi\AppData\Local\Programs\Python\Python313\Lib\site-packages\distributed\worker_state_machine.py:3608>> ended with CancelledError
+INFO:distributed.scheduler:Remove client Client-worker-e651bb28-04a1-11f1-bdb0-84144d2c9047
+INFO:distributed.worker:Removing Worker plugin shuffle
+WARNING:distributed.worker.state_machine:Async instruction for <Task cancelled name="execute('process_single_file-b76df91d-6baa-4655-a463-3df0ad191c43')" coro=<Worker.execute() done, defined at C:\Users\TangyKiwi\AppData\Local\Programs\Python\Python313\Lib\site-packages\distributed\worker_state_machine.py:3608>> ended with CancelledError
+INFO:distributed.worker:Removing Worker plugin shuffle
+INFO:distributed.core:Received 'close-stream' from tcp://127.0.0.1:60289; closing.
+INFO:distributed.scheduler:Remove client Client-worker-e655011e-04a1-11f1-af74-84144d2c9047
+INFO:distributed.scheduler:Remove client Client-worker-e651bb28-04a1-11f1-bdb0-84144d2c9047
+INFO:distributed.scheduler:Remove client Client-worker-e6567396-04a1-11f1-a34c-84144d2c9047
+INFO:distributed.core:Connection to tcp://127.0.0.1:60172 has been closed.
+INFO:distributed.core:Received 'close-stream' from tcp://127.0.0.1:60294; closing.
+INFO:distributed.scheduler:Remove client Client-worker-e64cebf3-04a1-11f1-96ec-84144d2c9047
+INFO:distributed.core:Connection to tcp://127.0.0.1:60172 has been closed.
+INFO:distributed.core:Received 'close-stream' from tcp://127.0.0.1:60286; closing.
+INFO:distributed.scheduler:Remove client Client-worker-e65875fe-04a1-11f1-9bc4-84144d2c9047
+INFO:distributed.core:Received 'close-stream' from tcp://127.0.0.1:60295; closing.
+INFO:distributed.scheduler:Remove client Client-worker-e6567396-04a1-11f1-a34c-84144d2c9047
+INFO:distributed.scheduler:Remove client Client-worker-e64cebf3-04a1-11f1-96ec-84144d2c9047
+INFO:distributed.scheduler:Remove client Client-worker-e65875fe-04a1-11f1-9bc4-84144d2c9047
+INFO:distributed.scheduler:Close client connection: Client-worker-e655011e-04a1-11f1-af74-84144d2c9047
+INFO:distributed.scheduler:Close client connection: Client-worker-e651bb28-04a1-11f1-bdb0-84144d2c9047
+INFO:distributed.core:Received 'close-stream' from tcp://127.0.0.1:60226; closing.
+INFO:distributed.core:Received 'close-stream' from tcp://127.0.0.1:60230; closing.
+INFO:distributed.core:Connection to tcp://127.0.0.1:60172 has been closed.
+INFO:distributed.scheduler:Remove worker addr: tcp://127.0.0.1:60214 name: 2 (stimulus_id='handle-worker-cleanup-1770522905.138565')
+INFO:distributed.scheduler:Remove worker addr: tcp://127.0.0.1:60221 name: 0 (stimulus_id='handle-worker-cleanup-1770522905.1390674')
+INFO:distributed.core:Connection to tcp://127.0.0.1:60172 has been closed.
+INFO:distributed.scheduler:Close client connection: Client-worker-e6567396-04a1-11f1-a34c-84144d2c9047
+INFO:distributed.scheduler:Close client connection: Client-worker-e64cebf3-04a1-11f1-96ec-84144d2c9047
+INFO:distributed.scheduler:Close client connection: Client-worker-e65875fe-04a1-11f1-9bc4-84144d2c9047
+INFO:distributed.core:Connection to tcp://127.0.0.1:60172 has been closed.
+INFO:distributed.core:Received 'close-stream' from tcp://127.0.0.1:60211; closing.
+INFO:distributed.core:Received 'close-stream' from tcp://127.0.0.1:60216; closing.
+INFO:distributed.core:Received 'close-stream' from tcp://127.0.0.1:60218; closing.
+INFO:distributed.scheduler:Remove worker addr: tcp://127.0.0.1:60197 name: 7 (stimulus_id='handle-worker-cleanup-1770522905.1428509')
+INFO:distributed.scheduler:Remove worker addr: tcp://127.0.0.1:60200 name: 4 (stimulus_id='handle-worker-cleanup-1770522905.1432927')
+INFO:distributed.scheduler:Remove worker addr: tcp://127.0.0.1:60205 name: 6 (stimulus_id='handle-worker-cleanup-1770522905.1436198')
+WARNING:distributed.scheduler:Removing worker 'tcp://127.0.0.1:60205' caused the cluster to lose already computed task(s), which will be recomputed elsewhere: {('sum-tree-9a9fbcadd622f47eb40412d5694175c5', 0), ('repartitiontofewer-167ba27c37c1055547f8380bcebb19f2', 0)} (stimulus_id='handle-worker-cleanup-1770522905.1436198')
+INFO:distributed.nanny:Nanny at 'tcp://127.0.0.1:60175' closed.
+INFO:distributed.nanny:Nanny at 'tcp://127.0.0.1:60183' closed.
+INFO:distributed.nanny:Nanny at 'tcp://127.0.0.1:60179' closed.
+INFO:distributed.nanny:Nanny at 'tcp://127.0.0.1:60187' closed.
+INFO:distributed.nanny:Nanny at 'tcp://127.0.0.1:60189' closed.
+INFO:distributed.worker:Stopping worker at tcp://127.0.0.1:60209. Reason: nanny-close
+WARNING:distributed.worker.state_machine:Async instruction for <Task cancelled name="execute('process_single_file-ea653932-6787-407e-a603-8ade7e60fc00')" coro=<Worker.execute() done, defined at C:\Users\TangyKiwi\AppData\Local\Programs\Python\Python313\Lib\site-packages\distributed\worker_state_machine.py:3608>> ended with CancelledError
+ERROR:distributed.worker:failed during get data with tcp://127.0.0.1:60209 -> None
+Traceback (most recent call last):
+  File "C:\Users\TangyKiwi\AppData\Local\Programs\Python\Python313\Lib\site-packages\distributed\comm\tcp.py", line 298, in write
+    raise StreamClosedError()
+tornado.iostream.StreamClosedError: Stream is closed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\TangyKiwi\AppData\Local\Programs\Python\Python313\Lib\site-packages\distributed\worker.py", line 1802, in get_data
+    compressed = await comm.write(msg, serializers=serializers)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\TangyKiwi\AppData\Local\Programs\Python\Python313\Lib\site-packages\distributed\comm\tcp.py", line 308, in write
+    convert_stream_closed_error(self, e)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\TangyKiwi\AppData\Local\Programs\Python\Python313\Lib\site-packages\distributed\comm\tcp.py", line 137, in convert_stream_closed_error
+    raise CommClosedError(f"in {obj}: {exc}") from exc
+distributed.comm.core.CommClosedError: in <TCP (closed)  local=tcp://127.0.0.1:60209 remote=tcp://127.0.0.1:60312>: Stream is closed
+ERROR:distributed.scheduler:Couldn't gather keys: {('repartitiontofewer-167ba27c37c1055547f8380bcebb19f2', 0): 'waiting'}
+INFO:distributed.worker:Removing Worker plugin shuffle
+WARNING:distributed.client:Couldn't gather 1 keys, rescheduling (('repartitiontofewer-167ba27c37c1055547f8380bcebb19f2', 0),)
+INFO:distributed.scheduler:Remove client Client-worker-e6551fde-04a1-11f1-b79c-84144d2c9047
+INFO:distributed.core:Received 'close-stream' from tcp://127.0.0.1:60290; closing.
+INFO:distributed.scheduler:Remove client Client-worker-e6551fde-04a1-11f1-b79c-84144d2c9047
+INFO:distributed.scheduler:Close client connection: Client-worker-e6551fde-04a1-11f1-b79c-84144d2c9047
+INFO:distributed.core:Received 'close-stream' from tcp://127.0.0.1:60224; closing.
+INFO:distributed.scheduler:Remove worker addr: tcp://127.0.0.1:60209 name: 3 (stimulus_id='handle-worker-cleanup-1770522906.9430134')
+INFO:distributed.core:Connection to tcp://127.0.0.1:60172 has been closed.
+INFO:distributed.nanny:Nanny at 'tcp://127.0.0.1:60181' closed.
+INFO:distributed.worker:Stopping worker at tcp://127.0.0.1:60219. Reason: nanny-close
+INFO:distributed.core:Event loop was unresponsive in Worker for 4.50s.  This is often caused by long-running GIL-holding functions or moving large chunks of data. This can cause timeouts and instability.
+WARNING:distributed.nanny:Worker process still alive after 4.0 seconds, killing
+WARNING:distributed.nanny:Worker process still alive after 4.0 seconds, killing
+INFO:distributed.core:Connection to tcp://127.0.0.1:60222 has been closed.
+INFO:distributed.scheduler:Remove worker addr: tcp://127.0.0.1:60206 name: 5 (stimulus_id='handle-worker-cleanup-1770522909.1426914')
+WARNING:distributed.scheduler:Removing worker 'tcp://127.0.0.1:60206' caused the cluster to lose already computed task(s), which will be recomputed elsewhere: {('repartitiontofewer-f7d07489fef57a338e128cfb10dfadc5', 0)} (stimulus_id='handle-worker-cleanup-1770522909.1426914')
+INFO:distributed.core:Connection to tcp://127.0.0.1:60293 has been closed.
+INFO:distributed.scheduler:Remove client Client-worker-e655a712-04a1-11f1-8ce4-84144d2c9047
+INFO:distributed.core:Connection to tcp://127.0.0.1:60228 has been closed.
+INFO:distributed.scheduler:Remove worker addr: tcp://127.0.0.1:60219 name: 1 (stimulus_id='handle-worker-cleanup-1770522909.1458757')
+INFO:distributed.scheduler:Lost all workers
+INFO:distributed.core:Connection to tcp://127.0.0.1:60287 has been closed.
+INFO:distributed.scheduler:Remove client Client-worker-e64f18cb-04a1-11f1-aee4-84144d2c9047
+INFO:distributed.batched:Batched Comm Closed <TCP (closed) Scheduler->Client local=tcp://127.0.0.1:60172 remote=tcp://127.0.0.1:60287>
+Traceback (most recent call last):
+  File "C:\Users\TangyKiwi\AppData\Local\Programs\Python\Python313\Lib\site-packages\distributed\batched.py", line 115, in _background_send
+    nbytes = yield coro
+             ^^^^^^^^^^
+  File "C:\Users\TangyKiwi\AppData\Roaming\Python\Python313\site-packages\tornado\gen.py", line 783, in run
+    value = future.result()
+  File "C:\Users\TangyKiwi\AppData\Local\Programs\Python\Python313\Lib\site-packages\distributed\comm\tcp.py", line 263, in write
+    raise CommClosedError()
+distributed.comm.core.CommClosedError
+INFO:distributed.batched:Batched Comm Closed <TCP (closed) Scheduler connection to worker local=tcp://127.0.0.1:60172 remote=tcp://127.0.0.1:60228>
+Traceback (most recent call last):
+  File "C:\Users\TangyKiwi\AppData\Local\Programs\Python\Python313\Lib\site-packages\distributed\batched.py", line 115, in _background_send
+    nbytes = yield coro
+             ^^^^^^^^^^
+  File "C:\Users\TangyKiwi\AppData\Roaming\Python\Python313\site-packages\tornado\gen.py", line 783, in run
+    value = future.result()
+  File "C:\Users\TangyKiwi\AppData\Local\Programs\Python\Python313\Lib\site-packages\distributed\comm\tcp.py", line 263, in write
+    raise CommClosedError()
+distributed.comm.core.CommClosedError
+INFO:distributed.scheduler:Close client connection: Client-worker-e655a712-04a1-11f1-8ce4-84144d2c9047
+INFO:distributed.scheduler:Close client connection: Client-worker-e64f18cb-04a1-11f1-aee4-84144d2c9047
+INFO:distributed.nanny:Worker process 28388 was killed by signal 15
+INFO:distributed.nanny:Nanny at 'tcp://127.0.0.1:60177' closed.
+INFO:distributed.nanny:Worker process 19684 was killed by signal 15
+INFO:distributed.nanny:Nanny at 'tcp://127.0.0.1:60185' closed.
+INFO:distributed.scheduler:Closing scheduler. Reason: unknown
+INFO:distributed.scheduler:Scheduler closing all comms
