@@ -43,9 +43,12 @@ def process_single_file(
     partition_size: str | None,
 ) -> Dict[str, int]:
     """
-    Process one Parquet file into an intermediate pivoted Parquet file.
+    Process one Parquet file into an intermediate cleaned Parquet file.
     """
+    logger = logging.getLogger(__name__)
     stats = defaultdict(int)
+
+    logger.info("[START file] %s", file_path)
 
     expected_month = infer_month_from_path(file_path)
     taxi_type = infer_taxi_type_from_path(file_path)
@@ -55,7 +58,14 @@ def process_single_file(
     if partition_size is not None:
         ddf = ddf.repartition(partition_size=partition_size)
 
-    stats["input_rows"] += int(ddf.shape[0].compute())
+    input_rows = int(ddf.shape[0].compute())
+    stats["input_rows"] += input_rows
+    logger.info(
+        "[READ file] %s rows=%d partitions=%d",
+        file_path,
+        input_rows,
+        ddf.npartitions,
+    )
 
     pickup_dt_col = find_pickup_datetime_col(ddf.columns.tolist())
     pickup_loc_col = find_pickup_location_col(ddf.columns.tolist())
@@ -72,11 +82,18 @@ def process_single_file(
 
     if expected_month is not None:
         y, m = expected_month
-        mismatch = (
+        mismatch = int(
             (ddf["pickup_datetime"].dt.year != y) |
             (ddf["pickup_datetime"].dt.month != m)
+        ).sum().compute()
+        stats["month_mismatch_rows"] += mismatch
+    
+        logger.info(
+            "[AGG file] %s bad_parse=%d month_mismatch=%d",
+            file_path,
+            bad_parse,
+            stats["month_mismatch_rows"],
         )
-        stats["month_mismatch_rows"] += int(mismatch.sum().compute())
 
     pdf = ddf.compute()
 
@@ -94,6 +111,13 @@ def process_single_file(
     out_path = intermediate_dir / f"{Path(file_path).stem}_pivot.parquet"
     cleaned.to_parquet(out_path, index=False)
 
+    logger.info(
+        "[DONE file] %s output_rows=%d dropped_low_count=%d",
+        file_path,
+        stats["output_rows"],
+        stats["rows_dropped_low_count"],
+    )
+
     return stats
 
 # ---------------------------------------------------
@@ -109,6 +133,13 @@ def process_month(
     """
     Schedule all files in a month in parallel.
     """
+    logger = logging.getLogger(__name__)
+    logger.info(
+        "[START month] %d files partition_size=%s",
+        len(files),
+        partition_size,
+    )
+
     file_tasks = [
         process_single_file(
             file_path=f,
@@ -120,6 +151,7 @@ def process_month(
     ]
 
     file_stats = merge_stats_dicts(file_tasks)
+    logger.info("[DONE month] %d files complete", len(files))
     return file_stats
 
 
@@ -178,6 +210,9 @@ def main():
         from dask.distributed import Client, LocalCluster
         cluster = LocalCluster(n_workers=args.workers, threads_per_worker=1)
         client = Client(cluster)
+        client.run_on_scheduler(
+            lambda: logging.getLogger("distributed").setLevel(logging.INFO)
+        )
         logger.info("Using Dask distributed with %d workers", args.workers)
     else:
         client = None
