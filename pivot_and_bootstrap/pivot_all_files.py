@@ -2,17 +2,16 @@ from __future__ import annotations
 
 import argparse
 from concurrent.futures import ProcessPoolExecutor
+import threading
 import logging
 import time
 import psutil
 from pathlib import Path
 from collections import defaultdict
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Optional
 
 import pyarrow.parquet as pq
 import pandas as pd
-import numpy as np
-from dask import delayed, compute
 from tqdm import tqdm
 
 from io_utils import discover_parquet_files, get_filesystem, is_s3_path
@@ -24,16 +23,11 @@ from pivot_utils import (
     pivot_counts_date_taxi_type_location,
     cleanup_low_count_rows,
 )
-from partition_optimization import (
-    parse_size,
-    find_optimal_partition_size,
-)
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 import geopandas as gpd
-from shapely.geometry import Point
 
 taxi_zones = gpd.read_file("taxi_zones.shx")
 taxi_zones = taxi_zones.set_crs(epsg=2263).to_crs(epsg=4326)
@@ -45,22 +39,44 @@ index_array = taxi_zones.index.values
 # Memory Tracking 
 # ---------------------------------------------------
 
-def process_single_file_rss(file_path: str,
-    intermediate_dir: Path,
-    min_rides: int
-) -> Dict[str, int]:
-    process = psutil.Process()
-    peak_rss = 0
-
-    def track_peak(mem_val):
-        nonlocal peak_rss
-        if mem_val > peak_rss:
-            peak_rss = mem_val
+class ParentMemoryMonitor:
+    interval_s: float = 0.1
+    _stop: threading.Event = threading.Event()
+    _thread: Optional[threading.Thread] = None
+    _proc: Optional[psutil.Process] = None
     
-    stats = process_single_file(file_path, intermediate_dir, min_rides)
-    track_peak(process.memory_info().rss)
-    stats["peak_rss"] = peak_rss
-    return stats
+    peak_rss_bytes: int = 0
+
+    def start(self) -> None:
+        if self._thread and self._thread.is_alive():
+            return
+        self._proc = psutil.Process()
+        self._stop.clear()
+        self._thread = threading.Thread(target=self._run, name="ParentMemoryMonitor", daemon=True)
+        self._thread.start()
+
+    def stop(self) -> int:
+        self._stop.set()
+        if self._thread:
+            self._thread.join()
+        return self.peak_rss_bytes
+    
+    def _run(self) -> None:
+        while not self._stop.is_set():
+            total = self._proc.memory_info().rss
+            seen_pids = set()
+
+            for p in self._proc.children(recursive=True):
+                try:
+                    if p.pid in seen_pids:
+                        continue
+                    seen_pids.add(p.pid)
+                    total += p.memory_info().rss
+                except (psutil.NoSuchProcess, psutil.AccessDenied):
+                    continue
+            if total > self.peak_rss_bytes:
+                self.peak_rss_bytes = total
+            self._stop.wait(self.interval_s)        
 
 # ---------------------------------------------------
 # Single-file processing
@@ -142,10 +158,13 @@ def process_single_file(
     df = df[~mismatch_mask]
 
     # drop rows with any na, final catch
-    before_dropna = len(df)
-    df = df.dropna(subset=[pickup_dt_col, pickup_loc_col])
-    after_dropna = len(df)
-    stats["dropped_na_rows"] = before_dropna - after_dropna
+    na_loc = df[pickup_loc_col].isna().sum()
+    df = df.dropna(subset=[pickup_loc_col])
+    stats["dropped_na_loc"] = na_loc
+
+    na_dt = df[pickup_dt_col].isna().sum()
+    df = df.dropna(subset=[pickup_dt_col])
+    stats["dropped_na_dt"] = na_dt
 
     df = df.assign(
         date=df[pickup_dt_col].dt.date,
@@ -153,6 +172,8 @@ def process_single_file(
         pickup_place=df[pickup_loc_col].astype('int64'),
         taxi_type=taxi_type,
     )
+
+    stats["pivot_rows"] = len(df)
 
     # logger.info("Current df rows after datetime and location processing: %d", len(df))
 
@@ -243,6 +264,9 @@ def main():
     )
     logger = logging.getLogger("pivot_pipeline")
 
+    parent_monitor = ParentMemoryMonitor()
+    parent_monitor.start()
+
     input_dir = args.input_dir
     output_dir = args.output_dir
     
@@ -262,8 +286,10 @@ def main():
         final_output = f"{output_dir}taxi_wide_table.parquet"
         fs.mkdirs(intermediate_dir, exist_ok=True)
 
+    discover_time = time.perf_counter()
     files = discover_parquet_files(input_dir)
     logger.info("Discovered %d Parquet files", len(files))
+    discover_time = time.perf_counter() - discover_time
 
     # Group by (year, month)
     files_by_month: Dict[Tuple[int, int], List[str]] = defaultdict(list)
@@ -275,19 +301,26 @@ def main():
     final_stats = defaultdict(int)
 
     all_files = [f for month_files in files_by_month.values() for f in month_files]
+    process_time = time.perf_counter()
     logger.info("Processing %d files grouped into %d months with %d workers", len(all_files), len(files_by_month), args.workers)
 
     with ProcessPoolExecutor(max_workers=args.workers) as executor:
-        results = list(tqdm(executor.map(process_single_file_rss, all_files, [intermediate_dir]*len(all_files), [args.min_rides]*len(all_files)), total=len(all_files)))
+        results = list(tqdm(executor.map(process_single_file, all_files, [intermediate_dir]*len(all_files), [args.min_rides]*len(all_files)), total=len(all_files)))
 
         for stats in results:
             for k, v in stats.items():
                 final_stats[k] += int(v)
 
+    final_stats["processing_runtime_seconds"] = time.perf_counter() - process_time
+    intermediate_time = time.perf_counter()
     final_rows = combine_into_wide_table(intermediate_dir, final_output)
+    parent_monitor.stop()
+    final_stats["discover_runtime_seconds"] = discover_time
+    final_stats["intermediate_combine_runtime_seconds"] = time.perf_counter() - intermediate_time
     final_stats["final_output_rows"] = final_rows
     final_stats["runtime_seconds"] = time.perf_counter() - start_time
-    final_stats["peak_rss_gb"] = final_stats["peak_rss"] / 1024**3
+    final_stats["peak_rss_mb"] = parent_monitor.peak_rss_bytes / 1024**2
+    final_stats["peak_rss_gb"] = parent_monitor.peak_rss_bytes / 1024**3
 
     logger.info("Pipeline complete")
     for k, v in final_stats.items():
