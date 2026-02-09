@@ -7,8 +7,7 @@ from pathlib import Path
 from collections import defaultdict
 from typing import Dict, List, Tuple
 
-import pandas as pd
-import dask
+import pyarrow.parquet as pq
 import dask.dataframe as dd
 from dask import delayed, compute
 
@@ -26,11 +25,22 @@ from partition_optimization import (
     find_optimal_partition_size,
 )
 
-import dask.dataframe as dd
-
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+import geopandas as gpd
+from shapely.geometry import Point
+
+taxi_zones = gpd.read_file("taxi_zones.shx")
+taxi_zones = taxi_zones.set_crs(epsg=2263).to_crs(epsg=4326)
+sindex = taxi_zones.sindex
+
+def find_pickup_place(lat, lon):
+    point = Point(lon, lat)
+    for idx in sindex.intersection(point.bounds):
+        if taxi_zones.geometry.iloc[idx].covers(point):
+            return idx + 1
+    return None
 
 # ---------------------------------------------------
 # Single-file processing
@@ -53,52 +63,67 @@ def process_single_file(
     expected_month = infer_month_from_path(file_path)
     taxi_type = infer_taxi_type_from_path(file_path)
 
-    ddf = dd.read_parquet(file_path, storage_options={'anon': True} if is_s3_path(file_path) else None)
+    schema = pq.read_schema(file_path, filesystem=get_filesystem(file_path))
+
+    # ddf = dd.read_parquet(file_path, storage_options={'anon': True} if is_s3_path(file_path) else None)
+
+    # if partition_size is not None:
+    #     ddf = ddf.repartition(partition_size=partition_size)
+
+    # input_rows = int(ddf.shape[0].compute())
+    # stats["input_rows"] += input_rows
+    # logger.info(
+    #     "[READ file] %s rows=%d partitions=%d",
+    #     file_path,
+    #     input_rows,
+    #     ddf.npartitions,
+    # )
+
+    pickup_dt_col = find_pickup_datetime_col(schema.names)
+    pickup_loc_col = find_pickup_location_col(schema.names)
+
+    read_cols = [pickup_dt_col]
+    lat_col, lon_col = None, None
+    if pickup_loc_col:
+        read_cols.append(pickup_loc_col)
+    else:
+        pickup_loc_col = 'pickup_place'
+        schema_cols = {col.lower(): col for col in schema.names}
+        if 'start_lat' in schema_cols and 'start_lon' in schema_cols:
+            lat_col = schema_cols['start_lat']
+            lon_col = schema_cols['start_lon']
+        elif 'pickup_latitude' in schema_cols and 'pickup_longitude' in schema_cols:
+            lat_col = schema_cols['pickup_latitude']
+            lon_col = schema_cols['pickup_longitude']
+        read_cols.extend([lat_col, lon_col])
+
+    ddf = dd.read_parquet(file_path, columns=read_cols, storage_options={'anon': True} if is_s3_path(file_path) else None)
+    input_rows = len(ddf)
+    stats["input_rows"] += input_rows
 
     if partition_size is not None:
         ddf = ddf.repartition(partition_size=partition_size)
 
-    input_rows = int(ddf.shape[0].compute())
-    stats["input_rows"] += input_rows
-    logger.info(
-        "[READ file] %s rows=%d partitions=%d",
-        file_path,
-        input_rows,
-        ddf.npartitions,
-    )
+    if lat_col and lon_col:
+        ddf['pickup_place'] = ddf.apply(lambda row: find_pickup_place(row[lat_col], row[lon_col]), axis=1, meta=('pickup_place', 'int64'))
+        ddf.drop(columns=[lat_col, lon_col])
 
-    pickup_dt_col = find_pickup_datetime_col(ddf.columns.tolist())
-    pickup_loc_col = find_pickup_location_col(ddf.columns.tolist())
-
-    ddf["pickup_datetime"] = dd.to_datetime(ddf[pickup_dt_col], errors="coerce")
-    bad_parse = ddf["pickup_datetime"].isna().sum().compute()
-    stats["bad_parse_rows"] += int(bad_parse)
-    ddf = ddf.dropna(subset=["pickup_datetime"])
+    ddf[pickup_dt_col] = dd.to_datetime(ddf[pickup_dt_col], errors="coerce")
+    y, m = expected_month
+    mismatch_mask = (ddf[pickup_dt_col].dt.year != y) | (ddf[pickup_dt_col].dt.month != m)
+    mismatch_count = mismatch_mask.sum()
+    stats["month_mismatch_rows"] += mismatch_count
+    ddf = ddf[~mismatch_mask]
 
     ddf = ddf.assign(
-        date=ddf["pickup_datetime"].dt.date,
-        hour=ddf["pickup_datetime"].dt.hour,
+        date=ddf[pickup_dt_col].dt.date,
+        hour=ddf[pickup_dt_col].dt.hour,
         pickup_place=ddf[pickup_loc_col],
         taxi_type=taxi_type,
     )
 
-    if expected_month is not None:
-        y, m = expected_month
-        mismatch = int((
-            (ddf["pickup_datetime"].dt.year != y) |
-            (ddf["pickup_datetime"].dt.month != m)
-        ).sum().compute())
-        stats["month_mismatch_rows"] += mismatch
-    
-        logger.info(
-            "[AGG file] %s bad_parse=%d month_mismatch=%d",
-            file_path,
-            bad_parse,
-            stats["month_mismatch_rows"],
-        )
-
-    pdf = ddf.compute()
-    pivoted = pivot_counts_date_taxi_type_location(pdf)
+    agg = ddf.groupby(["taxi_type", "date", "pickup_place", "hour"]).size().to_frame("count").reset_index()
+    pivoted = pivot_counts_date_taxi_type_location(agg)
     cleaned, cleanup_stats = cleanup_low_count_rows(pivoted, min_rides)
 
     for k, v in cleanup_stats.items():
@@ -114,12 +139,56 @@ def process_single_file(
         storage_options={"anon": True} if is_s3_path(out_path) else None,
     )
 
-    logger.info(
-        "[DONE file] %s output_rows=%d dropped_low_count=%d",
-        file_path,
-        stats["output_rows"],
-        stats["rows_dropped_low_count"],
-    )
+    # ddf["pickup_datetime"] = dd.to_datetime(ddf[pickup_dt_col], errors="coerce")
+    # bad_parse = ddf["pickup_datetime"].isna().sum().compute()
+    # stats["bad_parse_rows"] += int(bad_parse)
+    # ddf = ddf.dropna(subset=["pickup_datetime"])
+
+    # ddf = ddf.assign(
+    #     date=ddf["pickup_datetime"].dt.date,
+    #     hour=ddf["pickup_datetime"].dt.hour,
+    #     pickup_place=ddf[pickup_loc_col],
+    #     taxi_type=taxi_type,
+    # )
+
+    # if expected_month is not None:
+    #     y, m = expected_month
+    #     mismatch = int((
+    #         (ddf["pickup_datetime"].dt.year != y) |
+    #         (ddf["pickup_datetime"].dt.month != m)
+    #     ).sum().compute())
+    #     stats["month_mismatch_rows"] += mismatch
+    
+    #     logger.info(
+    #         "[AGG file] %s bad_parse=%d month_mismatch=%d",
+    #         file_path,
+    #         bad_parse,
+    #         stats["month_mismatch_rows"],
+    #     )
+
+    # pdf = ddf.compute()
+    # pivoted = pivot_counts_date_taxi_type_location(pdf)
+    # cleaned, cleanup_stats = cleanup_low_count_rows(pivoted, min_rides)
+
+    # for k, v in cleanup_stats.items():
+    #     stats[k] += v
+    # stats["output_rows"] += len(cleaned)
+
+    # out_path = f"{intermediate_dir}/{Path(file_path).stem}_pivot.parquet"
+
+    # logger.info("Writing intermediate parquet to %s", out_path)
+
+    # cleaned.to_parquet(
+    #     out_path,
+    #     storage_options={"anon": True} if is_s3_path(out_path) else None,
+    # )
+
+    # logger.info(
+    #     "[DONE file] %s output_rows=%d dropped_low_count=%d",
+    #     file_path,
+    #     stats["output_rows"],
+    #     stats["rows_dropped_low_count"],
+    # )
 
     return stats
 
@@ -235,11 +304,11 @@ def main():
     input_dir = args.input_dir
     output_dir = args.output_dir
     
-    fs, fs_path = get_filesystem(args.output_dir)
+    fs = get_filesystem(args.output_dir)
 
     if fs.protocol == "file":
-        logger.info("Creating local output directory at %s", fs_path)
-        output_dir = Path(fs_path)
+        logger.info("Creating local output directory at %s", output_dir)
+        output_dir = Path(output_dir)
         output_dir.mkdir(parents=True, exist_ok=True)
         intermediate_dir = output_dir / "intermediate"
         final_output = output_dir / "taxi_wide_table.parquet"
@@ -269,12 +338,12 @@ def main():
         partition_size = args.partition_size
 
         if not args.skip_partition_optimization and partition_size is None:
-            fs, fs_path = get_filesystem(month_files[0])
+            fs = get_filesystem(month_files[0])
             candidate_sizes = [
                 parse_size(s) for s in ["64MB", "128MB", "256MB"]    
             ]
             optimal = find_optimal_partition_size(
-                fs_path,
+                month_files[0],
                 candidate_sizes=candidate_sizes,
                 max_memory_usage=2 * 1024**3,  # 2 GB
                 filesystem=fs
@@ -303,15 +372,15 @@ def main():
         logger.info("%s: %s", k, v)
 
     if not args.keep_intermediate:
-        fs, base = get_filesystem(intermediate_dir)
+        fs = get_filesystem(intermediate_dir)
 
         logger.info("Removing intermediate files from %s", intermediate_dir)
 
-        for path in fs.ls(base):
+        for path in fs.ls(intermediate_dir):
             fs.rm(path, recursive=True)
 
         try:
-            fs.rmdir(base)
+            fs.rmdir(intermediate_dir)
         except Exception:
             pass
 

@@ -21,31 +21,26 @@ def find_pickup_datetime_col(columns: List[str]) -> str:
     Detect pickup datetime column name (case-insensitive).
     """
     candidates = [
-        "tpep_pickup_datetime",
-        "pickup_datetime",
+        "Trip_Pickup_DateTime",
         "lpep_pickup_datetime",
+        "pickup_datetime",
+        "tpep_pickup_datetime",
     ]
     lower = {c.lower(): c for c in columns}
     for cand in candidates:
         if cand.lower() in lower:
             return lower[cand.lower()]
-    raise KeyError("Pickup datetime column not found")
+    return None
 
 
 def find_pickup_location_col(columns: List[str]) -> str:
     """
     Detect pickup location column name.
     """
-    candidates = [
-        "pulocationid",
-        "pickup_location_id",
-        "pickup_location",
-    ]
     lower = {c.lower(): c for c in columns}
-    for cand in candidates:
-        if cand.lower() in lower:
-            return lower[cand.lower()]
-    raise KeyError("Pickup location column not found")
+    if "pulocationid" in lower:
+        return lower["pulocationid"]
+    return None
 
 
 def infer_taxi_type_from_path(file_path: str | Path) -> str:
@@ -94,24 +89,10 @@ def pivot_counts_date_taxi_type_location(ddf: dd.DataFrame) -> dd.DataFrame:
     index = (taxi_type, date, pickup_place)
     columns = hour_0 ... hour_23
     """
-    grouped = (
-        ddf
-        .groupby(["taxi_type", "date", "pickup_place", "hour"])
-        .size()
-        .to_frame(name = 'count')
-        .reset_index()
-    )
-
-    pivoted = (
-        grouped
-        .pivot_table(
-            index=["taxi_type", "date", "pickup_place"],
-            columns="hour",
-            values="count",
-            fill_value=0,
-        )
-    )
-
+    pivoted = ddf.pivot_table(
+        index=["taxi_type", "date", "pickup_place"], 
+        columns="hour", 
+        values="count").fillna(0)
     pivoted.columns = [f"hour_{int(h)}" for h in pivoted.columns]
     pivoted = pivoted.reset_index()
 
