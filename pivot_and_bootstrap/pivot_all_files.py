@@ -134,15 +134,18 @@ def process_single_file(
         stats["schema_error_rows"] = int(schema_error)
         logger.info("Missing pickup zones after spatial join: %d", schema_error)
 
-        # drop rows with missing pickup zones since we can't use them without a location
-        df = df.dropna(subset=['pickup_place'])
-
     df[pickup_dt_col] = pd.to_datetime(df[pickup_dt_col], errors="coerce")
     y, m = expected_month
     mismatch_mask = (df[pickup_dt_col].dt.year != y) | (df[pickup_dt_col].dt.month != m)
     mismatch_count = mismatch_mask.sum()
     stats["month_mismatch_rows"] = int(mismatch_count)
     df = df[~mismatch_mask]
+
+    # drop rows with any na, final catch
+    before_dropna = len(df)
+    df = df.dropna(subset=[pickup_dt_col, pickup_loc_col])
+    after_dropna = len(df)
+    stats["dropped_na_rows"] = before_dropna - after_dropna
 
     df = df.assign(
         date=df[pickup_dt_col].dt.date,
