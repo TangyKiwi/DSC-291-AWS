@@ -1,15 +1,19 @@
 from __future__ import annotations
 
 import argparse
+from concurrent.futures import ProcessPoolExecutor
 import logging
 import time
+import psutil
 from pathlib import Path
 from collections import defaultdict
 from typing import Dict, List, Tuple
 
 import pyarrow.parquet as pq
-import dask.dataframe as dd
+import pandas as pd
+import numpy as np
 from dask import delayed, compute
+from tqdm import tqdm
 
 from io_utils import discover_parquet_files, get_filesystem, is_s3_path
 from pivot_utils import (
@@ -34,28 +38,42 @@ from shapely.geometry import Point
 taxi_zones = gpd.read_file("taxi_zones.shx")
 taxi_zones = taxi_zones.set_crs(epsg=2263).to_crs(epsg=4326)
 sindex = taxi_zones.sindex
+geom_array = taxi_zones.geometry.values
+index_array = taxi_zones.index.values
 
-def find_pickup_place(lat, lon):
-    point = Point(lon, lat)
-    for idx in sindex.intersection(point.bounds):
-        if taxi_zones.geometry.iloc[idx].covers(point):
-            return idx + 1
-    return None
+# ---------------------------------------------------
+# Memory Tracking 
+# ---------------------------------------------------
+
+def process_single_file_rss(file_path: str,
+    intermediate_dir: Path,
+    min_rides: int
+) -> Dict[str, int]:
+    process = psutil.Process()
+    peak_rss = 0
+
+    def track_peak(mem_val):
+        nonlocal peak_rss
+        if mem_val > peak_rss:
+            peak_rss = mem_val
+    
+    stats = process_single_file(file_path, intermediate_dir, min_rides)
+    track_peak(process.memory_info().rss)
+    stats["peak_rss"] = peak_rss
+    return stats
 
 # ---------------------------------------------------
 # Single-file processing
 # ---------------------------------------------------
-@delayed
 def process_single_file(
     file_path: str,
     intermediate_dir: Path,
-    min_rides: int,
-    partition_size: str | None,
+    min_rides: int
 ) -> Dict[str, int]:
     """
     Process one Parquet file into an intermediate cleaned Parquet file.
     """
-    logger = logging.getLogger(__name__)
+    logger = logging.getLogger("pivot_pipeline.process_single_file")
     stats = defaultdict(int)
 
     logger.info("[START file] %s", file_path)
@@ -64,20 +82,6 @@ def process_single_file(
     taxi_type = infer_taxi_type_from_path(file_path)
 
     schema = pq.read_schema(file_path, filesystem=get_filesystem(file_path))
-
-    # ddf = dd.read_parquet(file_path, storage_options={'anon': True} if is_s3_path(file_path) else None)
-
-    # if partition_size is not None:
-    #     ddf = ddf.repartition(partition_size=partition_size)
-
-    # input_rows = int(ddf.shape[0].compute())
-    # stats["input_rows"] += input_rows
-    # logger.info(
-    #     "[READ file] %s rows=%d partitions=%d",
-    #     file_path,
-    #     input_rows,
-    #     ddf.npartitions,
-    # )
 
     pickup_dt_col = find_pickup_datetime_col(schema.names)
     pickup_loc_col = find_pickup_location_col(schema.names)
@@ -97,32 +101,60 @@ def process_single_file(
             lon_col = schema_cols['pickup_longitude']
         read_cols.extend([lat_col, lon_col])
 
-    ddf = dd.read_parquet(file_path, columns=read_cols, storage_options={'anon': True} if is_s3_path(file_path) else None)
-    input_rows = len(ddf)
-    stats["input_rows"] += input_rows
-
-    if partition_size is not None:
-        ddf = ddf.repartition(partition_size=partition_size)
+    df = pd.read_parquet(
+        file_path, 
+        columns=read_cols, 
+        engine="pyarrow",
+        storage_options={'anon': True} if is_s3_path(file_path) else None,
+    )
+    input_rows = len(df)
+    stats["input_rows"] = input_rows
+    logger.info(
+        "[READ file] %s rows=%d",
+        file_path,
+        input_rows
+    )
 
     if lat_col and lon_col:
-        ddf['pickup_place'] = ddf.apply(lambda row: find_pickup_place(row[lat_col], row[lon_col]), axis=1, meta=('pickup_place', 'int64'))
-        ddf.drop(columns=[lat_col, lon_col])
+        df['pickup_place'] = np.nan
+        logger.info("Performing spatial join to find pickup zones for %s", file_path)
+        pickup_loc_col = 'pickup_place'
+        
+        gdf_points = gpd.GeoDataFrame(
+            geometry=gpd.points_from_xy(df[lon_col], df[lat_col]),
+            crs=taxi_zones.crs
+        )
+        joined = gpd.sjoin(gdf_points, taxi_zones, how="left", predicate="within")
+        joined = joined.reset_index()
+        joined = joined.drop_duplicates(subset=['index'])
+        df.loc[joined['index'], 'pickup_place'] = joined['index_right'] + 1
+        df = df.drop(columns=[lat_col, lon_col])
 
-    ddf[pickup_dt_col] = dd.to_datetime(ddf[pickup_dt_col], errors="coerce")
+        logger.info("Spatial join complete for %s", file_path)
+        schema_error = df['pickup_place'].isna().sum()
+        stats["schema_error_rows"] = int(schema_error)
+        logger.info("Missing pickup zones after spatial join: %d", schema_error)
+
+        # drop rows with missing pickup zones since we can't use them without a location
+        df = df.dropna(subset=['pickup_place'])
+
+    df[pickup_dt_col] = pd.to_datetime(df[pickup_dt_col], errors="coerce")
     y, m = expected_month
-    mismatch_mask = (ddf[pickup_dt_col].dt.year != y) | (ddf[pickup_dt_col].dt.month != m)
+    mismatch_mask = (df[pickup_dt_col].dt.year != y) | (df[pickup_dt_col].dt.month != m)
     mismatch_count = mismatch_mask.sum()
-    stats["month_mismatch_rows"] += mismatch_count
-    ddf = ddf[~mismatch_mask]
+    stats["month_mismatch_rows"] = int(mismatch_count)
+    df = df[~mismatch_mask]
 
-    ddf = ddf.assign(
-        date=ddf[pickup_dt_col].dt.date,
-        hour=ddf[pickup_dt_col].dt.hour,
-        pickup_place=ddf[pickup_loc_col],
+    df = df.assign(
+        date=df[pickup_dt_col].dt.date,
+        hour=df[pickup_dt_col].dt.hour,
+        pickup_place=df[pickup_loc_col].astype('int64'),
         taxi_type=taxi_type,
     )
 
-    agg = ddf.groupby(["taxi_type", "date", "pickup_place", "hour"]).size().to_frame("count").reset_index()
+    # logger.info("Current df rows after datetime and location processing: %d", len(df))
+
+    agg = df.groupby(["taxi_type", "date", "pickup_place", "hour"]).size().reset_index(name="count")
     pivoted = pivot_counts_date_taxi_type_location(agg)
     cleaned, cleanup_stats = cleanup_low_count_rows(pivoted, min_rides)
 
@@ -139,93 +171,7 @@ def process_single_file(
         storage_options={"anon": True} if is_s3_path(out_path) else None,
     )
 
-    # ddf["pickup_datetime"] = dd.to_datetime(ddf[pickup_dt_col], errors="coerce")
-    # bad_parse = ddf["pickup_datetime"].isna().sum().compute()
-    # stats["bad_parse_rows"] += int(bad_parse)
-    # ddf = ddf.dropna(subset=["pickup_datetime"])
-
-    # ddf = ddf.assign(
-    #     date=ddf["pickup_datetime"].dt.date,
-    #     hour=ddf["pickup_datetime"].dt.hour,
-    #     pickup_place=ddf[pickup_loc_col],
-    #     taxi_type=taxi_type,
-    # )
-
-    # if expected_month is not None:
-    #     y, m = expected_month
-    #     mismatch = int((
-    #         (ddf["pickup_datetime"].dt.year != y) |
-    #         (ddf["pickup_datetime"].dt.month != m)
-    #     ).sum().compute())
-    #     stats["month_mismatch_rows"] += mismatch
-    
-    #     logger.info(
-    #         "[AGG file] %s bad_parse=%d month_mismatch=%d",
-    #         file_path,
-    #         bad_parse,
-    #         stats["month_mismatch_rows"],
-    #     )
-
-    # pdf = ddf.compute()
-    # pivoted = pivot_counts_date_taxi_type_location(pdf)
-    # cleaned, cleanup_stats = cleanup_low_count_rows(pivoted, min_rides)
-
-    # for k, v in cleanup_stats.items():
-    #     stats[k] += v
-    # stats["output_rows"] += len(cleaned)
-
-    # out_path = f"{intermediate_dir}/{Path(file_path).stem}_pivot.parquet"
-
-    # logger.info("Writing intermediate parquet to %s", out_path)
-
-    # cleaned.to_parquet(
-    #     out_path,
-    #     storage_options={"anon": True} if is_s3_path(out_path) else None,
-    # )
-
-    # logger.info(
-    #     "[DONE file] %s output_rows=%d dropped_low_count=%d",
-    #     file_path,
-    #     stats["output_rows"],
-    #     stats["rows_dropped_low_count"],
-    # )
-
     return stats
-
-# ---------------------------------------------------
-# Month processing
-# ---------------------------------------------------
-@delayed
-def process_month(
-    files,
-    intermediate_dir,
-    min_rides,
-    partition_size,
-):
-    """
-    Schedule all files in a month in parallel.
-    """
-    logger = logging.getLogger(__name__)
-    logger.info(
-        "[START month] %d files partition_size=%s",
-        len(files),
-        partition_size,
-    )
-
-    file_tasks = [
-        process_single_file(
-            file_path=f,
-            intermediate_dir=intermediate_dir,
-            min_rides=min_rides,
-            partition_size=partition_size,
-        )
-        for f in files
-    ]
-
-    file_stats = merge_stats_dicts(file_tasks)
-    logger.info("[DONE month] %d files complete", len(files))
-    return file_stats
-
 
 # ---------------------------------------------------
 # Combine all intermediate files
@@ -240,8 +186,9 @@ def combine_into_wide_table(
     """
     logger.info("Reading intermediates from %s", intermediate_dir)
 
-    ddf = dd.read_parquet(
+    ddf = pd.read_parquet(
         intermediate_dir,
+        engine="pyarrow",
         storage_options={"anon": True} if is_s3_path(intermediate_dir) else None,
     )
 
@@ -258,13 +205,12 @@ def combine_into_wide_table(
 
     final.to_parquet(
         output_path,
-        write_index=False,
+        index=False,
         storage_options={"anon": True} if is_s3_path(output_path) else None,
     )
 
-    return final.shape[0].compute()
+    return final.shape[0]
 
-@delayed
 def merge_stats_dicts(stats_list):
     merged = defaultdict(int)
     for stats in stats_list:
@@ -287,19 +233,13 @@ def main():
     parser.add_argument("--keep-intermediate", action="store_true")
 
     args = parser.parse_args()
-    start_time = time.time()
+    start_time = time.perf_counter()
 
-    if args.workers > 1:
-        from dask.distributed import Client, LocalCluster
-        cluster = LocalCluster(n_workers=args.workers, threads_per_worker=1)
-        client = Client(cluster)
-        client.run_on_scheduler(
-            lambda: logging.getLogger("distributed").setLevel(logging.INFO)
-        )
-        logger.info("Using Dask distributed with %d workers", args.workers)
-    else:
-        client = None
-        logger.info("Using single-threaded Dask")
+    logging.basicConfig(
+        level=getattr(logging, "INFO", logging.INFO),
+        format="%(asctime)s [%(levelname)s] %(message)s",
+    )
+    logger = logging.getLogger("pivot_pipeline")
 
     input_dir = args.input_dir
     output_dir = args.output_dir
@@ -330,42 +270,22 @@ def main():
         if ym:
             files_by_month[ym].append(f)
 
-    month_tasks = []
+    final_stats = defaultdict(int)
 
-    for (year, month), month_files in sorted(files_by_month.items()):
-        logger.info("Scheduling %04d-%02d (%d files)", year, month, len(month_files))
+    all_files = [f for month_files in files_by_month.values() for f in month_files]
+    logger.info("Processing %d files grouped into %d months with %d workers", len(all_files), len(files_by_month), args.workers)
 
-        partition_size = args.partition_size
+    with ProcessPoolExecutor(max_workers=args.workers) as executor:
+        results = list(tqdm(executor.map(process_single_file_rss, all_files, [intermediate_dir]*len(all_files), [args.min_rides]*len(all_files)), total=len(all_files)))
 
-        if not args.skip_partition_optimization and partition_size is None:
-            fs = get_filesystem(month_files[0])
-            candidate_sizes = [
-                parse_size(s) for s in ["64MB", "128MB", "256MB"]    
-            ]
-            optimal = find_optimal_partition_size(
-                month_files[0],
-                candidate_sizes=candidate_sizes,
-                max_memory_usage=2 * 1024**3,  # 2 GB
-                filesystem=fs
-            )
-            partition_size = f"{optimal}B"
-            logger.info("Optimal partition size for %04d-%02d: %s", year, month, partition_size)
-
-        task = process_month(
-            files=month_files,
-            intermediate_dir=intermediate_dir,
-            min_rides=args.min_rides,
-            partition_size=partition_size
-        )
-        month_tasks.append(task)
-
-    month_stats = compute(*month_tasks)
-    final_stats = merge_stats_dicts(month_stats).compute()  
+        for stats in results:
+            for k, v in stats.items():
+                final_stats[k] += int(v)
 
     final_rows = combine_into_wide_table(intermediate_dir, final_output)
-
     final_stats["final_output_rows"] = final_rows
-    final_stats["runtime_seconds"] = int(time.time() - start_time)
+    final_stats["runtime_seconds"] = time.perf_counter() - start_time
+    final_stats["peak_rss_gb"] = final_stats["peak_rss"] / 1024**3
 
     logger.info("Pipeline complete")
     for k, v in final_stats.items():
@@ -383,9 +303,6 @@ def main():
             fs.rmdir(intermediate_dir)
         except Exception:
             pass
-
-    if client is not None:
-        client.close()
 
 if __name__ == "__main__":
     main()
