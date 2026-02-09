@@ -116,7 +116,6 @@ def process_single_file(
     )
 
     if lat_col and lon_col:
-        df['pickup_place'] = np.nan
         logger.info("Performing spatial join to find pickup zones for %s", file_path)
         pickup_loc_col = 'pickup_place'
         
@@ -127,7 +126,7 @@ def process_single_file(
         joined = gpd.sjoin(gdf_points, taxi_zones, how="left", predicate="within")
         joined = joined.reset_index()
         joined = joined.drop_duplicates(subset=['index'])
-        df.loc[joined['index'], 'pickup_place'] = joined['index_right'] + 1
+        df['pickup_place'] = joined['index_right'].add(1)
         df = df.drop(columns=[lat_col, lon_col])
 
         logger.info("Spatial join complete for %s", file_path)
