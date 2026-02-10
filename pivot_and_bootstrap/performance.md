@@ -11,7 +11,7 @@ on an AWS `r8i.4xlarge` instance (16 vCPUS, 128 GB vRAM)
 
 ## Runtime & Memory
 
-- Total Runtime: 226.08 seconds (3.77 minutes, 0 hours)
+- Total Runtime: 225.61 seconds (3.76 minutes, 0 hours)
 - Peak Memory: 126,307.64 MB (123.35 GB)
 
 ## Output
