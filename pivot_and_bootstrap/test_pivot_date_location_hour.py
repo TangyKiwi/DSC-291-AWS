@@ -1,6 +1,4 @@
 import pandas as pd
-import numpy as np
-import pytest
 
 from pivot_utils import (
     find_pickup_datetime_col,

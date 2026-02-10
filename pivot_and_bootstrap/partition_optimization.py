@@ -3,7 +3,7 @@ from __future__ import annotations
 import re
 import time
 import logging
-from typing import Iterable, Optional
+from typing import Iterable
 
 import pyarrow.parquet as pq
 

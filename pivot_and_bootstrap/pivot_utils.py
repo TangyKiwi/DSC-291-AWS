@@ -5,10 +5,6 @@ from pathlib import Path
 from typing import Optional, Tuple, Dict, List
 
 import pandas as pd
-import logging
-
-logger = logging.getLogger(__name__)
-
 
 # ----------------------------
 # Column detection utilities
