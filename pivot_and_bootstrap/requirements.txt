@@ -1,6 +1,7 @@
 fsspec
-pyarrow
 pandas
-tqdm
 psutil
+pyarrow
 pytest
+s3fs
+tqdm
