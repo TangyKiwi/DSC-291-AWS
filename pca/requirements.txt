@@ -1,0 +1,7 @@
+dask[array]
+numpy
+matplotlib
+pandas
+pyarrow
+fsspec
+s3fs
