@@ -5,3 +5,6 @@ pandas
 pyarrow
 fsspec
 s3fs
+folium
+geopandas
+branca
