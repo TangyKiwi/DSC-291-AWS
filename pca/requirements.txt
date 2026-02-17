@@ -8,3 +8,4 @@ s3fs
 folium
 geopandas
 branca
+tqdm
