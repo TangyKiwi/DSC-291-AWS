@@ -310,6 +310,13 @@ def compute_stability_metrics(original_components: np.ndarray, bootstrap_compone
     }
     
     print("Stability metrics computed")
+    print(f"\nCorrelation statistics:")
+    for k in range(K):
+        corr_mean = np.mean(component_correlations[:, k])
+        corr_std = np.std(component_correlations[:, k])
+        corr_min = np.min(component_correlations[:, k])
+        corr_max = np.max(component_correlations[:, k])
+        print(f"  PC{k+1}: mean={corr_mean:.6f}, std={corr_std:.6f}, range=[{corr_min:.6f}, {corr_max:.6f}]")
     
     return metrics, subspace_affinities, procrustes_distances, component_correlations
 
@@ -416,7 +423,7 @@ def main():
     """Main execution function."""
     # Parameters
     B = 100  # Number of bootstrap iterations
-    K = 3    # Number of eigenvectors to analyze
+    K = 5    # Number of eigenvectors to analyze
     
     # Define paths
     base_dir = Path(__file__).parent
