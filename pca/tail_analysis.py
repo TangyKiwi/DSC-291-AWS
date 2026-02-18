@@ -185,15 +185,11 @@ def classify_tail(qq_deviation: float, survival_linearity: float, r_squared: flo
     if r_squared is None:
         return "light"  # Default to light if no fit
     
+    # Using 0.85 as a threshold
     if r_squared > 0.85:
         return "heavy"
-    elif r_squared < 0.7:
-        return "light"
     else:
-        # Intermediate case - check other factors
-        # For now, classify as heavy if R² is decent
-        return "heavy" if r_squared > 0.75 else "light"
-
+        return "light"
 
 def create_visualizations(coefficients: np.ndarray, output_path: str):
     """
