@@ -1,0 +1,9 @@
+{
+  "tail_classification": "heavy",
+  "alpha": 4.063451297228597,
+  "r_squared": 0.9475766256198822,
+  "mean": 0.007864184539953903,
+  "std": 0.20397259930732908,
+  "n_coefficients": 576,
+  "tail_threshold": 0.6883357715418011
+}

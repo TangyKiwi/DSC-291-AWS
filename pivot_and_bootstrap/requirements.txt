@@ -1,4 +1,5 @@
 fsspec
+geopandas
 pandas
 psutil
 pyarrow
